@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — EduSeat</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* ================= PREMIUM GLASS VARIABLES ================= */
+        :root {
+            --primary: #22c55e;
+            --primary-glow: rgba(34, 197, 94, 0.4);
+            --bg: #020617;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-heavy: rgba(15, 23, 42, 0.6);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --sidebar-width: 280px;
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.light {
+            --bg: #f0f4f8;
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --glass-heavy: rgba(255, 255, 255, 0.7);
+            --text: #0f172a;
+            --muted: #64748b;
+        }
+
+        /* ================= DYNAMIC BACKGROUND ================= */
+        .glass-master {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: var(--bg);
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 600px; height: 600px; background: var(--primary); top: -10%; right: -5%; }
+        .orb-2 { width: 500px; height: 500px; background: #16a34a; bottom: -10%; left: -5%; animation-delay: -5s; }
+        .orb-3 { width: 300px; height: 300px; background: #0ea5e9; top: 30%; left: 20%; opacity: 0.08; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 40px) scale(1.05); }
+        }
+
+        /* ================= GLOBAL STYLES ================= */
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ================= SIDEBAR (FLOATING GLASS) ================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: calc(100vh - 40px);
+            margin: 20px;
+            background: var(--glass-heavy);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 40px 24px;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .nav-btn {
+            padding: 16px 20px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            border-radius: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            transform: translateX(8px);
+        }
+
+        .sidebar-footer { margin-top: auto; }
+
+        .toggle {
+            background: var(--glass-bg);
+            padding: 14px;
+            border-radius: 16px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 12px;
+            transition: var(--transition);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        .toggle:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+        .logout {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 14px;
+            border-radius: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .logout:hover { background: #ef4444; color: white; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
+
+        /* ================= MAIN CONTENT ================= */
+        .main {
+            margin-left: calc(var(--sidebar-width) + 60px);
+            padding: 60px 40px;
+            width: 100%;
+            max-width: 1400px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { 
+            font-size: 42px; 
+            font-weight: 800; 
+            margin-bottom: 40px; 
+            letter-spacing: -1.5px; 
+            background: linear-gradient(to right, #fff, var(--muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        body.light h1 { -webkit-text-fill-color: var(--text); }
+
+        /* ================= DASHBOARD GRID ================= */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--glass-heavy);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            padding: 35px;
+            border-radius: 32px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4), 0 0 20px var(--primary-glow);
+        }
+
+        .icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .card:hover .icon {
+            background: var(--primary);
+            color: white;
+            transform: rotate(-5deg);
+        }
+
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 1024px) {
+            .sidebar { width: 85px; padding: 40px 10px; }
+            .sidebar span, .logo span { display: none; }
+            .main { margin-left: 125px; }
+            h1 { font-size: 32px; }
+        }
+
+        @media (max-width: 600px) {
+            .main { margin-left: 0; padding: 20px; margin-top: 100px; }
+            .sidebar { width: calc(100% - 40px); height: auto; bottom: 20px; top: auto; flex-direction: row; justify-content: space-around; padding: 15px; }
+            .sidebar-footer { display: none; }
+            .nav-group { flex-direction: row; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="glass-master">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<div class="sidebar">
+    <div class="logo">
+        <i data-lucide="graduation-cap" size="32"></i> <span>EduSeat</span>
+    </div>
+
+    <div class="nav-group">
+        <button class="nav-btn" onclick="go('upload')">
+            <i data-lucide="cloud-upload"></i> <span>Upload Data</span>
+        </button>
+
+        <button class="nav-btn" onclick="go('instructions')">
+            <i data-lucide="file-text"></i> <span>Instructions</span>
+        </button>
+
+        <button class="nav-btn" onclick="go('generate')">
+            <i data-lucide="cpu"></i> <span>Generate</span>
+        </button>
+
+        <button class="nav-btn" onclick="go('email')">
+            <i data-lucide="send"></i> <span>Email</span>
+        </button>
+
+        <button class="nav-btn" onclick="go('history')">
+            <i data-lucide="history"></i> <span>View History</span>
+        </button>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="toggle" onclick="toggleTheme()">
+            <i data-lucide="palette"></i> <span>Switch Theme</span>
+        </div>
+        <button class="logout" onclick="logout()">
+            <i data-lucide="log-out"></i> <span>Logout</span>
+        </button>
+    </div>
+</div>
+
+<div class="main">
+    <h1>Dashboard</h1>
+
+    <div class="grid">
+        <div class="card" onclick="go('upload')">
+            <div class="icon"><i data-lucide="upload-cloud" size="28"></i></div>
+            <h3>Upload Data</h3>
+            <p>Import Excel resources for students, room capacities, and teacher invigilation schedules.</p>
+        </div>
+
+        <div class="card" onclick="go('instructions')">
+            <div class="icon"><i data-lucide="file-text" size="28"></i></div>
+            <h3>Instructions</h3>
+            <p>Manage and upload instruction PDFs and exam guidelines for students and staff.</p>
+        </div>
+
+        <div class="card" onclick="go('generate')">
+            <div class="icon"><i data-lucide="sparkles" size="28"></i></div>
+            <h3>Generate</h3>
+            <p>Execute the seating algorithm to create optimized room allocations automatically.</p>
+        </div>
+
+        <div class="card" onclick="go('email')">
+            <div class="icon"><i data-lucide="mail" size="28"></i></div>
+            <h3>Email</h3>
+            <p>Distribute personalized seating arrangements and instructions via automated emails.</p>
+        </div>
+
+        <div class="card" onclick="go('history')">
+            <div class="icon"><i data-lucide="clock-3" size="28"></i></div>
+            <h3>History</h3>
+            <p>Review, download, or re-send previous exam allocations and historical data records.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    /* THEME LOGIC PRESERVED */
+    (function(){
+        const saved = localStorage.getItem("theme");
+        if(saved === "light") document.body.classList.add("light");
+    })();
+
+    function toggleTheme(){
+        document.body.classList.toggle("light");
+        localStorage.setItem(
+            "theme",
+            document.body.classList.contains("light") ? "light" : "dark"
+        );
+    }
+
+    /* NAVIGATION LOGIC PRESERVED */
+    function go(page){
+        window.location = page + ".html";
+    }
+
+    function logout(){
+        window.location = "login.html";
+    }
+</script>
+
+</body>
+</html>

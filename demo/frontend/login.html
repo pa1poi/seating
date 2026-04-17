@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduSeat Secure Login</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* ================= PREMIUM GLASS VARIABLES ================= */
+        :root {
+            --primary: #22c55e;
+            --primary-glow: rgba(34, 197, 94, 0.4);
+            --bg: #020617;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-heavy: rgba(15, 23, 42, 0.6);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.light {
+            --bg: #f0f4f8;
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --glass-heavy: rgba(255, 255, 255, 0.7);
+            --text: #0f172a;
+            --muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ================= DYNAMIC BACKGROUND ================= */
+        .glass-master {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: var(--bg);
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.2;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 500px; height: 500px; background: var(--primary); top: -10%; right: -5%; }
+        .orb-2 { width: 400px; height: 400px; background: #16a34a; bottom: -10%; left: -5%; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 40px) scale(1.1); }
+        }
+
+        /* ================= GLOBAL STYLES ================= */
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* ================= PREMIUM LOGIN CARD ================= */
+        .card {
+            width: 400px;
+            padding: 50px 40px;
+            border-radius: 40px;
+            background: var(--glass-heavy);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            transition: var(--transition);
+            animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        /* SUCCESS STATE */
+        .card.success {
+            box-shadow: 0 0 60px var(--primary-glow);
+            border-color: var(--primary);
+        }
+
+        /* ================= AUTH ICON ================= */
+        .lock-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            border-radius: 24px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            position: relative;
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px var(--primary-glow); }
+        }
+
+        /* ================= INPUTS ================= */
+        h2 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+        p.subtitle { margin: 8px 0 35px; color: var(--muted); font-size: 14px; font-weight: 500; }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        input::placeholder { color: var(--muted); opacity: 0.6; }
+
+        input:focus {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        body.light input:focus { background: rgba(255, 255, 255, 0.8); }
+
+        /* ================= SECURITY BAR ================= */
+        .security {
+            height: 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 10px 0 25px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        .security-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+            box-shadow: 0 0 10px var(--primary);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ================= BUTTON ================= */
+        button {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 15px 30px rgba(34, 197, 94, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.5);
+            filter: brightness(1.1);
+        }
+
+        button:active { transform: translateY(0); }
+
+        /* ================= THEME TOGGLE ================= */
+        .theme-float {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: var(--transition);
+        }
+
+        .theme-float:hover { background: var(--primary); color: white; transform: rotate(15deg); }
+
+        /* ================= LOADER ================= */
+        .loader {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.05);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ================= TOAST ================= */
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background: var(--glass-heavy);
+            backdrop-filter: blur(20px);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 18px 28px;
+            border-radius: 20px;
+            display: none;
+            font-weight: 600;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="glass-master">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+</div>
+
+<div class="card" id="card">
+    <div class="theme-float" onclick="toggleTheme()">
+        <i data-lucide="sun-moon" size="20"></i>
+    </div>
+
+    <div class="lock-container">
+        <i data-lucide="shield-check" size="36"></i>
+    </div>
+
+    <h2>EduSeat Admin</h2>
+    <p class="subtitle">Secure System Authentication</p>
+
+    <div class="input-wrapper">
+        <input id="email" placeholder="Admin Email">
+    </div>
+    
+    <div class="input-wrapper">
+        <input id="password" type="password" placeholder="Password">
+    </div>
+
+    <div class="input-wrapper">
+        <input id="key" placeholder="Master Access Key">
+    </div>
+
+    <div class="security">
+        <div class="security-fill" id="secFill"></div>
+    </div>
+
+    <button onclick="login()">
+        Authenticate Access <i data-lucide="chevron-right" size="18"></i>
+    </button>
+
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= THEME LOGIC PRESERVED ================= */
+(function(){
+    const savedTheme = localStorage.getItem("theme");
+    if(savedTheme === "light"){
+        document.body.classList.add("light");
+    }
+})();
+
+function toggleTheme(){
+    document.body.classList.toggle("light");
+    localStorage.setItem("theme",
+        document.body.classList.contains("light") ? "light" : "dark");
+}
+
+lucide.createIcons();
+
+const API="http://localhost:8081/api";
+
+/* ================= SECURITY BAR PRESERVED ================= */
+document.getElementById("password").addEventListener("input", e => {
+    let val = e.target.value.length;
+    let bar = document.getElementById("secFill");
+    let percent = Math.min(val*10,100);
+    bar.style.width = percent + "%";
+});
+
+/* ================= TOAST PRESERVED ================= */
+function showToast(msg){
+    let t=document.getElementById("toast");
+    t.innerText=msg;
+    t.style.display="block";
+    setTimeout(()=>t.style.display="none",3000);
+}
+
+/* ================= LOGIN METHOD PRESERVED ================= */
+async function login(){
+    let email=document.getElementById("email").value;
+    let password=document.getElementById("password").value;
+    let key=document.getElementById("key").value;
+
+    let loader=document.getElementById("loader");
+    let card=document.getElementById("card");
+
+    loader.style.display="block";
+
+    try {
+        let res=await fetch(
+            API+"/auth/login?email="+encodeURIComponent(email)
+            +"&password="+encodeURIComponent(password)
+            +"&key="+encodeURIComponent(key),
+            {method:"POST"}
+        );
+
+        let ok=await res.text();
+        loader.style.display="none";
+
+        if(ok==="true"){
+            card.classList.add("success");
+            setTimeout(()=>{
+                window.location="dashboard.html";
+            },1200);
+        } else {
+            showToast("Invalid Credentials ❌");
+        }
+    } catch(e) {
+        loader.style.display="none";
+        showToast("Server Error ❌");
+    }
+}
+</script>
+
+</body>
+</html>

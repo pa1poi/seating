@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Data — EduSeat</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* ================= PREMIUM GLASS THEME ================= */
+        :root {
+            --primary: #22c55e;
+            --primary-glow: rgba(34, 197, 94, 0.3);
+            --bg: #030712;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-heavy: rgba(15, 23, 42, 0.85);
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --sidebar-width: 280px;
+        }
+
+        body.light {
+            --bg: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-heavy: rgba(255, 255, 255, 0.95);
+            --text: #0f172a;
+            --muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ================= GLOBAL RESET ================= */
+        * { box-sizing: border-box; outline: none; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.4s ease;
+        }
+
+        /* Moving Mesh Orbs */
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden; pointer-events: none;
+        }
+        .orb {
+            position: absolute; filter: blur(120px); border-radius: 50%;
+            opacity: 0.12; background: var(--primary);
+            animation: move 25s infinite alternate ease-in-out;
+        }
+        @keyframes move { from { transform: translate(-10%, -10%); } to { transform: translate(30%, 30%); } }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: calc(100vh - 40px);
+            margin: 20px;
+            background: var(--glass-heavy);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 35px 25px;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px; font-weight: 800; margin-bottom: 45px;
+            display: flex; align-items: center; gap: 12px;
+            color: var(--primary); letter-spacing: -0.5px;
+        }
+
+        .nav-group { display: flex; flex-direction: column; gap: 8px; }
+
+        .nav-btn {
+            padding: 14px 18px; border: none; background: transparent;
+            color: var(--muted); border-radius: 16px; cursor: pointer;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 15px; font-weight: 500; transition: 0.3s;
+        }
+
+        .nav-btn:hover { background: var(--glass); color: var(--text); }
+        .nav-btn.active { 
+            background: linear-gradient(135deg, #22c55e, #15803d); 
+            color: white; box-shadow: 0 10px 20px var(--primary-glow);
+        }
+
+        .sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .toggle {
+            background: var(--glass); padding: 12px; border-radius: 14px;
+            cursor: pointer; text-align: center; font-size: 14px;
+            border: 1px solid var(--glass-border); transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        .logout {
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444; padding: 12px; border-radius: 14px;
+            cursor: pointer; width: 100%; font-weight: 600; transition: 0.3s;
+        }
+        .logout:hover { background: #ef4444; color: white; }
+
+        /* ================= MAIN CONTENT ================= */
+        .main {
+            margin-left: calc(var(--sidebar-width) + 60px);
+            padding: 60px 40px; width: 100%; max-width: 1300px;
+        }
+
+        h2 { font-size: 36px; font-weight: 800; margin-bottom: 40px; letter-spacing: -1px; }
+
+        /* ================= CARDS & INPUTS ================= */
+        .card {
+            background: var(--glass); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 40px; border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); margin-bottom: 35px;
+        }
+
+        h3 { 
+            margin: 0 0 25px 0; font-size: 18px; font-weight: 700; 
+            color: var(--primary); display: flex; align-items: center; gap: 10px;
+        }
+
+        .meta-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        /* Dropdown & Input Fixes */
+        select, input {
+            padding: 15px 18px; border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-family: inherit; font-size: 14px; transition: 0.3s;
+            width: 100%;
+        }
+
+        /* Force option visibility in dark mode */
+        select option {
+            background: #1e293b; /* Dark background for dropdown items */
+            color: #ffffff;
+        }
+        body.light select option {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            background: rgba(0,0,0,0.4);
+        }
+
+        /* Calendar Fix */
+        input[type="date"] {
+            color-scheme: dark; /* Native dark mode for picker */
+        }
+        body.light input[type="date"] { color-scheme: light; }
+
+        /* Custom style for the calendar icon to ensure visibility */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(0.8); /* Makes the black icon almost white */
+            transition: 0.3s;
+        }
+        body.light input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0);
+        }
+
+        /* ================= DROP ZONES ================= */
+        .upload-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+        }
+
+        .drop {
+            border: 2px dashed var(--glass-border);
+            border-radius: 20px; padding: 45px 25px;
+            text-align: center; cursor: pointer; transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            background: rgba(255,255,255,0.01);
+        }
+
+        .drop:hover {
+            border-color: var(--primary);
+            background: rgba(34, 197, 94, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .drop i { color: var(--muted); margin-bottom: 15px; transition: 0.3s; }
+        .drop:hover i { color: var(--primary); transform: scale(1.1); }
+
+        .file-info { font-size: 12px; color: var(--primary); margin-top: 12px; font-weight: 600; }
+        .status { 
+            font-size: 13px; margin-top: 15px; color: var(--muted); 
+            display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500;
+        }
+
+        /* ================= BUTTONS ================= */
+        .btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none; color: white; padding: 18px;
+            border-radius: 18px; font-weight: 700; font-size: 16px;
+            cursor: pointer; margin-top: 30px; width: 100%;
+            box-shadow: 0 12px 24px var(--primary-glow);
+            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 15px 35px var(--primary-glow); filter: brightness(1.1); }
+
+        /* ================= TOAST & TICK ================= */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            background: var(--glass-heavy); border: 1px solid var(--primary);
+            color: white; padding: 18px 28px; border-radius: 20px;
+            display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); z-index: 1000;
+        }
+
+        .tick { width: 30px; height: 30px; }
+        .tick-circle { stroke: var(--primary); stroke-width: 3; fill: none; stroke-dasharray: 166; stroke-dashoffset: 166; animation: circle 0.6s ease forwards; }
+        .tick-path { stroke: var(--primary); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-dasharray: 48; stroke-dashoffset: 48; animation: check 0.4s 0.5s ease forwards; }
+        @keyframes circle { to { stroke-dashoffset: 0; } }
+        @keyframes check { to { stroke-dashoffset: 0; } }
+
+        @media (max-width: 1100px) {
+            .sidebar { width: 85px; padding: 35px 15px; }
+            .sidebar span, .logo span { display: none; }
+            .main { margin-left: 130px; }
+            .upload-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="mesh-bg">
+    <div class="orb" style="width: 500px; height: 500px; top: -150px; right: -100px;"></div>
+    <div class="orb" style="width: 400px; height: 400px; bottom: -100px; left: -50px; background: #15803d;"></div>
+</div>
+
+<div class="sidebar">
+    <div class="logo">
+        <i data-lucide="graduation-cap"></i> <span>EduSeat</span>
+    </div>
+
+    <div class="nav-group">
+        <button class="nav-btn" onclick="go('dashboard')"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></button>
+        <button class="nav-btn active" onclick="go('upload')"><i data-lucide="cloud-upload"></i> <span>Upload</span></button>
+        <button class="nav-btn" onclick="go('instructions')"><i data-lucide="file-text"></i> <span>Instructions</span></button>
+        <button class="nav-btn" onclick="go('generate')"><i data-lucide="sparkles"></i> <span>Generate</span></button>
+        <button class="nav-btn" onclick="go('email')"><i data-lucide="mail"></i> <span>Email</span></button>
+        <button class="nav-btn" onclick="go('history')"><i data-lucide="clock-rewind"></i> <span>History</span></button>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="toggle" onclick="toggleTheme()"><i data-lucide="sun-moon"></i> <span>Theme</span></div>
+        <button class="logout" onclick="logout()"><i data-lucide="log-out"></i> <span>Logout</span></button>
+    </div>
+</div>
+
+<div class="main">
+    <h2>Exam Setup & Upload</h2>
+
+    <!-- ================= META INFO ================= -->
+    <div class="card">
+        <h3><i data-lucide="clipboard-list"></i> Exam Information</h3>
+        <div class="meta-grid">
+            <input id="examName" placeholder="Exam Name (e.g. Sessional 1)">
+            
+            <select id="examType">
+                <option value="">Exam Type</option>
+                <option>Sessional 1</option>
+                <option>Sessional 2</option>
+                <option>Supplementary</option>
+                <option>Betterment</option>
+                <option>Final Exam</option>
+            </select>
+
+            <select id="semester">
+                <option value="">Semester</option>
+                <option>1</option><option>2</option><option>3</option>
+                <option>4</option><option>5</option><option>6</option>
+                <option>7</option><option>8</option>
+            </select>
+
+            <select id="degree">
+                <option value="">Degree</option>
+                <option>B.Tech</option>
+                <option>B.Sc</option>
+                <option>B.Com</option>
+                <option>M.Tech</option>
+                <option>MBA</option>
+            </select>
+
+            <select id="studentsPerBench">
+  <option value="1">1 Student per Bench</option>
+  <option value="2" selected>2 Students per Bench</option>
+  <option value="3">3 Students per Bench</option>
+</select>
+
+            <input id="course" placeholder="Course / Branch">
+            <input type="date" id="examDate">
+        </div>
+    </div>
+
+    <!-- ================= FILE UPLOAD ================= -->
+    <div class="card">
+        <h3><i data-lucide="folder-up"></i> Data Resources</h3>
+        <div class="upload-grid">
+            <div id="studentsDrop" class="drop">
+                <i data-lucide="users-2" size="40"></i><br>
+                <strong>Students Excel</strong>
+                <input type="file" hidden id="studentsFile">
+                <div class="file-info" id="studentsInfo"></div>
+                <div class="status" id="studentsStatus">Pending</div>
+            </div>
+
+            <div id="roomsDrop" class="drop">
+                <i data-lucide="home" size="40"></i><br>
+                <strong>Rooms Excel</strong>
+                <input type="file" hidden id="roomsFile">
+                <div class="file-info" id="roomsInfo"></div>
+                <div class="status" id="roomsStatus">Pending</div>
+            </div>
+
+            <div id="examDrop" class="drop">
+                <i data-lucide="calendar-days" size="40"></i><br>
+                <strong>Exam Excel</strong>
+                <input type="file" hidden id="examFile">
+                <div class="file-info" id="examInfo"></div>
+                <div class="status" id="examStatus">Pending</div>
+            </div>
+
+            <div id="teachersDrop" class="drop">
+                <i data-lucide="user-check" size="40"></i><br>
+                <strong>Teachers Excel</strong>
+                <input type="file" hidden id="teachersFile">
+                <div class="file-info" id="teachersInfo"></div>
+                <div class="status" id="teachersStatus">Pending</div>
+            </div>
+        </div>
+
+        <button type="button" class="btn" onclick="nextPage()">
+Next → Instructions
+</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+
+/* ================= SAFE INIT ================= */
+
+if (window.lucide) {
+    lucide.createIcons();
+}
+
+const API = "http://localhost:8081/api";
+let generated = false;
+
+
+/* ================= UPLOAD STATE ================= */
+
+let uploaded = {
+    students: localStorage.getItem("uploaded_students")==="true",
+    rooms: localStorage.getItem("uploaded_rooms")==="true",
+    exam: localStorage.getItem("uploaded_exam")==="true",
+    teachers: localStorage.getItem("uploaded_teachers")==="true"
+};
+
+
+/* ================= THEME ================= */
+
+(function(){
+    const saved = localStorage.getItem("theme");
+    if(saved==="light") document.body.classList.add("light");
+})();
+
+function toggleTheme(){
+    document.body.classList.toggle("light");
+    localStorage.setItem(
+        "theme",
+        document.body.classList.contains("light") ? "light":"dark"
+    );
+}
+
+
+/* ================= NAV ================= */
+
+function go(p){
+    console.log("Navigating →", p);
+    window.location.href = p + ".html";
+}
+
+function logout(){
+    window.location.href = "login.html";
+}
+
+
+/* ================= TOAST ================= */
+
+function toast(msg){
+    let t=document.getElementById("toast");
+    if(!t) return;
+    t.innerText=msg;
+    t.style.display="block";
+    setTimeout(()=>t.style.display="none",3000);
+}
+
+
+/* ================= FILE UPLOAD ================= */
+
+function setup(zone,fileId,statusId,endpoint,infoId,key){
+
+    let z=document.getElementById(zone);
+    let f=document.getElementById(fileId);
+
+    if(!z || !f) return;
+
+    z.onclick=()=>f.click();
+
+    f.onchange=()=>uploadFile(f.files[0]);
+
+    async function uploadFile(file){
+
+        if(!file){
+            toast("Select file ❗");
+            return;
+        }
+
+        if(!file.name.endsWith(".xlsx")){
+            toast("Upload Excel only ❌");
+            return;
+        }
+
+        document.getElementById(infoId).innerText =
+            file.name + " (" + Math.round(file.size/1024) + " KB)";
+
+        let form = new FormData();
+        form.append("file",file);
+
+        document.getElementById(statusId).innerText="Uploading...";
+
+        try{
+
+            const res = await fetch(API+endpoint,{
+                method:"POST",
+                body:form
+            });
+
+            if(!res.ok) throw new Error();
+
+            document.getElementById(statusId).innerHTML="✅ Uploaded";
+
+            uploaded[key] = true;
+            localStorage.setItem("uploaded_"+key, "true");
+
+            toast("Upload Successful");
+
+        }catch(e){
+
+            document.getElementById(statusId).innerText="Upload Failed ❌";
+            toast("Upload Error");
+
+        }
+    }
+}
+
+
+/* INIT FILE ZONES */
+
+setup("studentsDrop","studentsFile","studentsStatus",
+"/upload/students","studentsInfo","students");
+
+setup("roomsDrop","roomsFile","roomsStatus",
+"/upload/rooms","roomsInfo","rooms");
+
+setup("examDrop","examFile","examStatus",
+"/upload/exam","examInfo","exam");
+
+setup("teachersDrop","teachersFile","teachersStatus",
+"/upload/teachers","teachersInfo","teachers");
+
+
+
+/* ================= RESTORE UI ================= */
+
+window.addEventListener("load", () => {
+
+    if(uploaded.students)
+        document.getElementById("studentsStatus").innerHTML="✅ Uploaded";
+
+    if(uploaded.rooms)
+        document.getElementById("roomsStatus").innerHTML="✅ Uploaded";
+
+    if(uploaded.exam)
+        document.getElementById("examStatus").innerHTML="✅ Uploaded";
+
+    if(uploaded.teachers)
+        document.getElementById("teachersStatus").innerHTML="✅ Uploaded";
+});
+
+
+
+/* ================= NEXT PAGE ================= */
+
+function nextPage(){
+
+    console.log("Next button clicked");
+
+    try{
+
+        let examName   = document.getElementById("examName")?.value?.trim();
+        let examType   = document.getElementById("examType")?.value?.trim();
+        let semester   = document.getElementById("semester")?.value?.trim();
+        let degree     = document.getElementById("degree")?.value?.trim();
+        let course     = document.getElementById("course")?.value?.trim();
+        let studentsPB = document.getElementById("studentsPerBench")?.value?.trim();
+        let examDate   = document.getElementById("examDate")?.value?.trim();
+
+        /* AUTO YEAR FROM SEMESTER */
+        let year = "";
+
+        if(semester){
+            const sem = parseInt(semester);
+            year = Math.ceil(sem / 2);
+        }
+
+        /* VALIDATION */
+        if(!examName || !examType || !semester || !degree || !course){
+            toast("Fill all exam details ❌");
+            return;
+        }
+
+        if(!uploaded.students || !uploaded.rooms ||
+           !uploaded.exam || !uploaded.teachers){
+
+            toast("Upload all files first ❌");
+            return;
+        }
+
+        const meta = {
+            examName,
+            examType,
+            semester,
+            degree,
+            course,
+            year,
+            studentsPerBench: studentsPB,
+            date: examDate
+        };
+
+        localStorage.setItem("examMeta", JSON.stringify(meta));
+
+        console.log("Meta saved:", meta);
+
+        /* NAVIGATION */
+        window.location.href = "instructions.html";
+
+    }catch(e){
+        console.error("NEXT ERROR:", e);
+        toast("Something went wrong ❌");
+    }
+}
+
+
+
+/* ================= ALLOCATION ================= */
+
+async function allocate(){
+
+    document.getElementById("loader").style.display="block";
+    document.getElementById("statusText").innerText="Running smart allocation...";
+
+    try{
+
+        const meta = JSON.parse(localStorage.getItem("examMeta"));
+
+        const request = {
+            semester: parseInt(meta.semester),
+            year: parseInt(meta.year),
+            course: meta.course,
+            studentsPerBench: parseInt(meta.studentsPerBench)
+        };
+
+        const res = await fetch("http://localhost:8081/allocate",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify(request)
+        });
+
+        if(!res.ok) throw new Error();
+
+        generated = true;
+
+        document.getElementById("statusText").innerHTML =
+            "✅ Allocation Completed Successfully";
+
+        toast("Seating Generated Successfully");
+
+    }catch(e){
+
+        console.error(e);
+
+        document.getElementById("statusText").innerText="Error during generation ❌";
+        toast("Generation Failed");
+
+    }
+
+    document.getElementById("loader").style.display="none";
+}
+
+
+
+/* ================= DOWNLOAD ================= */
+
+function download(endpoint){
+
+    if(!generated){
+        toast("Please generate seating first ❗");
+        return;
+    }
+
+    window.open(API + endpoint);
+}
+
+
+
+/* ================= NEXT AFTER GENERATE ================= */
+
+function nextGeneratePage(){
+
+    if(!generated){
+        toast("Generate seating first ❗");
+        return;
+    }
+
+    go("email");
+}
+
+</script>
+</body>
+</html>
